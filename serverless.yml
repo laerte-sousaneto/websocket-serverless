@@ -1,0 +1,72 @@
+service: bento-stream
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  websocketsApiName: bento-stream-api
+  websocketsApiRouteSelectionExpression: $request.body.action # custom routes are selected by the value of the action property in the body
+  websocketsDescription: Websocket stream service for bentobox
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - Fn::GetAtt: [ ConnectionsTable, Arn ]
+  environment:
+    CONNECTIONS_TABLE: ${self:custom.websocketConnectionsTable}
+#  logs:
+#    websocket: true
+
+custom:
+  functionsBasePath: src
+  websocketConnectionsTable: 'bentostream-connections-${sls:stage}'
+
+functions:
+  connectionHandler:
+    handler: handlers.connect
+    events:
+      - websocket:
+          route: $connect
+  disconnectHandler:
+    handler: handlers.disconnect
+    events:
+      - websocket:
+          route: $disconnect
+  defaultHandler:
+    handler: handlers.message
+    events:
+      - websocket: $default #simple event definition without extra route property
+
+
+resources:
+  Resources:
+    ConnectionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: connectionId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: connectionId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:custom.websocketConnectionsTable}
+
+
+plugins:
+  - serverless-functions-base-path
+
+package:
+  exclude:
+    - ./**
+    - '!node_modules/**'
+  include:
+    - src/**
+    - package.json

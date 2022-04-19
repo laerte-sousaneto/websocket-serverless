@@ -1,0 +1,25 @@
+{
+  "name": "bentostream",
+  "version": "1.0.0",
+  "description": "Websocket stream service for bentobox",
+  "main": "src/handlers/index.js",
+  "scripts": {
+    "deploy": "serverless deploy",
+    "remove": "serverless remove"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/laerte-sousaneto/websocket-serverless.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/laerte-sousaneto/websocket-serverless/issues"
+  },
+  "homepage": "https://github.com/laerte-sousaneto/websocket-serverless#readme",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "serverless-functions-base-path": "^1.0.32"
+  }
+}
